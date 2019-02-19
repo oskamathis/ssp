@@ -8,8 +8,10 @@ app.config.update({'DEBUG': True })
 @app.route("/req", methods=['POST'])
 def req():
     # SDKからリクエストを受信
-    params = request.json
-    app_id = params.get('app_id')
+    request_time = datetime.now().strftime('%Y%m%d-%H%M%S.%4N')
+    app_id = request.json.get('app_id')
+    ssp_name = 'y_sako'
+    request_id = ssp_name + '-' + str(uuid.uuid4())
 
     # DSPにリクエストを送信
 
