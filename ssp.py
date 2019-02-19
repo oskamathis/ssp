@@ -5,15 +5,29 @@ from datetime import datetime
 import uuid
 import requests
 import json
-from joblib import Parallel, delayed
+from multiprocessing import Pool
+import multiprocessing as multi
+from timeout_decorator import timeout, TimeoutError
+import random
 
 app = Flask(__name__)
 app.config.update({"DEBUG": True})
 
-def get_price(url, payload):
-    headers = {"content-type": "application/json"}
-    price = requests.post(url, json.dumps(payload), headers=headers).json().get("price")
-    return (url, price)
+DSP_COUNT = 8
+HEADERS = {"content-type": "application/json"}
+
+def process(args):
+    try:
+        return send_request(*args)
+    except TimeoutError:
+        return None
+
+@timeout(0.1)
+def send_request(request_url, payload):
+    response = requests.post(request_url, json.dumps(payload), headers=HEADERS).json()
+    response_url = response.get("url")
+    price = response.get("price")
+    return (response_url, price)
 
 @app.route("/req", methods=["POST"])
 def req():
@@ -26,24 +40,36 @@ def req():
 
     # DSPにリクエストを送信
     # url = "http://dsp1.example.jp/req"
-    url = "http://localhost:5000/req"
+    request_url = "http://localhost:6000/req"
     payload = {
         "ssp_name": ssp_name,
         "request_time": request_time,
         "request_id": request_id,
         "app_id": app_id
     }
-    result = Parallel(n_jobs=-1)([delayed(get_price)(url+str(n), payload) for n in range(5)])
+
+    n_cores = multi.cpu_count()
+    with Pool(n_cores) as pool:
+        result = pool.map(process, [[request_url, payload] for i in range(random.randint(1,DSP_COUNT))])
 
     # DSPからのレスポンスを集計
-    result.sort(key=lambda x: x[1], reverse=True)
-    url = result[0][0]
-    price = result[1][1]
+    result = [x for x in result if x]
+
+    if len(result) == 1:
+        response_url = result[0][0]
+        price = 1
+    elif len(result) == 0:
+        response_url = "http://example.com/ad/image/" + str(app_id)
+        price = 0
+    else:
+        result.sort(key=lambda x: x[1], reverse=True)
+        response_url = result[0][0]
+        price = result[1][1]
 
     # SDKにレスポンスを送信
-    response = {"url": url, "price": price}
+    response = {"url": response_url, "price": price}
     return make_response(jsonify(response))
 
 
 if __name__ == "__main__":
-    app.run(port=4000)
+    app.run(threaded=True)
