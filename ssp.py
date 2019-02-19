@@ -12,7 +12,8 @@ app.config.update({"DEBUG": True})
 @app.route("/req", methods=["POST"])
 def req():
     # SDKからリクエストを受信
-    request_time = datetime.now().strftime("%Y%m%d-%H%M%S.%4N")
+    now = datetime.now()
+    request_time = now.strftime("%Y%m%d-%H%M%S.") + str(now.microsecond)[:4]
     app_id = request.json.get("app_id")
     ssp_name = "y_sako"
     request_id = ssp_name + "-" + str(uuid.uuid4())
