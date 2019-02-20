@@ -66,6 +66,13 @@ def req():
         response_url = result[0][0]
         price = result[1][1]
 
+    # DSPにWinNoticeを送信
+    win_url = "http://localhost:6000/win"
+    win_payload = {"request_id": request_id, "price": price}
+    win_response = requests.post(win_url, json.dumps(win_payload), headers=HEADERS).json()
+    if not win_response.get("result") == "ok":
+        return make_response(jsonify(win_payload))
+
     # SDKにレスポンスを送信
     response = {"url": response_url, "price": price}
     return make_response(jsonify(response))

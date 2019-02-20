@@ -30,5 +30,20 @@ def req():
     return make_response(jsonify(response))
 
 
+@app.route("/win", methods=["POST"])
+def win():
+    # SSPからリクエストを受信
+    params = request.json
+    request_id = request.json.get("request_id")
+    price = request.json.get("price")
+    time.sleep(random.uniform(0, MAX_SLEEP_TIME))
+
+    # SSPにレスポンスを送信
+    response = {
+        "result": "ok"
+    }
+    return make_response(jsonify(response))
+
+
 if __name__ == "__main__":
     app.run(threaded=True, port=6000)
