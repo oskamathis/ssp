@@ -77,7 +77,7 @@ def req():
         return make_response(jsonify(win_payload))
 
     # SDKにレスポンスを送信
-    response = {"url": response_url, "price": price}
+    response = {"url": response_url}
     return make_response(jsonify(response))
 
 
