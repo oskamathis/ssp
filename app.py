@@ -17,7 +17,7 @@ config = json.load(open("config.json", "r"))
 SSP_NAME = "y_sako"
 HEADERS = {"content-type": "application/json"}
 AD_URL = "http://example.com/ad/image/"
-ENV = os.getenv("FLASK_APP_ENV", "production"))
+ENV = os.getenv("FLASK_APP_ENV", "production")
 
 if ENV == "development":
     app.config.update({"DEBUG": True})
