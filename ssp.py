@@ -9,6 +9,10 @@ from multiprocessing import Pool
 import multiprocessing as multi
 from timeout_decorator import timeout, TimeoutError
 import random
+import configparser
+
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 app = Flask(__name__)
 app.config.update({"DEBUG": True})
@@ -39,8 +43,7 @@ def req():
     request_id = ssp_name + "-" + str(uuid.uuid4())
 
     # DSPにリクエストを送信
-    # url = "http://dsp1.example.jp/req"
-    request_url = "http://localhost:6000/req"
+    request_urls = ["http://" + config["host"][key] + "/req" for key in config["host"]]
     payload = {
         "ssp_name": ssp_name,
         "request_time": request_time,
@@ -50,7 +53,7 @@ def req():
 
     n_cores = multi.cpu_count()
     with Pool(n_cores) as pool:
-        result = pool.map(process, [[request_url, payload] for i in range(random.randint(1,DSP_COUNT))])
+        result = pool.map(process, [[request_url, payload] for request_url in request_urls])
 
     # DSPからのレスポンスを集計
     result = [x for x in result if x]
