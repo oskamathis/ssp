@@ -1,7 +1,7 @@
 import multiprocessing
 
 # Worker Processes
-workers = 2
+workers = 1
 worker_class = 'sync'
 
 # Logging
