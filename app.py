@@ -45,7 +45,7 @@ def req():
     request_id = SSP_NAME + "-" + str(uuid.uuid4())
 
     # DSPにリクエストを送信
-    urls = ("http://" + host + ":" + port for host, port in config[ENV]["DSP"])
+    urls = ("http://" + host + ":" + port for host, port in config[ENV]["DSP"].items())
     payload = {
         "ssp_name": SSP_NAME,
         "request_time": request_time,
