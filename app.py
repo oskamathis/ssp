@@ -54,8 +54,9 @@ def req():
     }
 
     n_cores = multi.cpu_count()
-    with Pool(n_cores) as pool:
-        result = pool.map(process, [(url, payload) for url in urls])
+    pool = Pool(n_cores)
+    result = pool.map(process, [(url, payload) for url in urls])
+    pool.close()
 
     # DSPからのレスポンスを集計
     result = [x for x in result if x]
