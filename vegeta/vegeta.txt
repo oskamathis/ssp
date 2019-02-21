@@ -1,3 +1,0 @@
-POST http://54.168.160.75:8888/req
-Content-Type: application/json
-@sdk.json
